@@ -28,7 +28,13 @@ if __name__ == "__main__":
     Caminho = r"C:\Users\DIVOP\RODOVIARIO CAMILO DOS SANTOS FILHO LTDA\Matrix - Rodoviário Camilo dos Santos - DIVOP"
     relatorios = {}
 
-    run_automacao_solucao(relatorios, Caminho, PARAMETROS_FILE, PATH_OUTPUT)
+    try:
+        run_automacao_solucao(relatorios, Caminho, PARAMETROS_FILE, PATH_OUTPUT)
+    except KeyboardInterrupt:
+        LOGGER.warning("Automação interrompida manualmente pelo usuário (Ctrl+C).")
+        LOGGER.info("======= FIM DA AUTOMAÇÃO SOLUÇÃO ========")
+        import sys
+        sys.exit(0)
 
     # Obtém a data e hora atuais
     current_datetime = datetime.now().strftime('%d/%m/%Y %H:%M:%S')

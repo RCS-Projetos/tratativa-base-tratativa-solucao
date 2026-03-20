@@ -10,6 +10,12 @@ from _455 import gerar_455
 from utils.utils import mostrar_todo_dataframe, gerar_dataframe, remover_arquivos_na_pasta
 import logging
 import psutil  # pip install psutil
+import signal
+
+
+def _mute_keyboard_interrupt():
+    """Ignora Ctrl+C nos subprocessos para que apenas o processo principal lide com ele."""
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -79,10 +85,9 @@ def executar_processos(lista_dicionarios):
     LOGGER.info(f"max_workers calculado: {max_processes}")
 
     # Pool único: evita overhead de criar/destroir processos a cada mini-lote
-    with ProcessPoolExecutor(max_workers=max_processes) as executor:
-        future_to_relatorio = {}
-
+    with ProcessPoolExecutor(max_workers=max_processes, initializer=_mute_keyboard_interrupt) as executor:
         for item in lista_dicionarios:
+            future_to_relatorio = {}
             for key, detalhe in item.items():
                 LOGGER.info(f"{key}: {detalhe}")
 
@@ -128,14 +133,14 @@ def executar_processos(lista_dicionarios):
                 # - se for leve: diminua
                 sleep(40 if is_156 else 1)
 
-        # Coleta resultados (e loga erros)
-        for future in as_completed(future_to_relatorio):
-            relatorio = future_to_relatorio[future]
-            try:
-                future.result()
-                LOGGER.info(f"Automação {relatorio} completada com sucesso.")
-            except Exception as e:
-                LOGGER.exception(f"Automação {relatorio} falhou com erro: {e}")
+            # Coleta resultados (e loga erros) do mini-lote
+            for future in as_completed(future_to_relatorio):
+                relatorio = future_to_relatorio[future]
+                try:
+                    future.result()
+                    LOGGER.info(f"Automação {relatorio} completada com sucesso.")
+                except Exception as e:
+                    LOGGER.exception(f"Automação {relatorio} falhou com erro: {e}")
 
 
 def dividir_dicionario_em_minis(dicionario, max_elementos=9):
