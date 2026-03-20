@@ -1,0 +1,13 @@
+__pycache__
+.env
+
+*.parquet
+*spec
+build
+build/*
+dist
+dist/*
+*.sswweb
+*.csv
+*.log.*
+*.log
