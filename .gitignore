@@ -1,27 +1,36 @@
-__pycache__
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
 .env
 
-*.parquet
-*spec
-build
-build/*
-dist
-dist/*
-*.sswweb
-*.csv
-*.log.*
+# IDEs
+.idea/
+.vscode/
+
+# Build and distribution directories
+build/
+dist/
+*.spec
+
+# Logs
+logs/
 *.log
-Fontes/*
-.env
-__pycache__
-*.spec
-.idea
-dist
-build
-logs
-*.spec
+*.log.*
+
+# Data files (ignored by default to prevent large commits)
+*.csv
 *.parquet
 *.xlsx
-*.csv
+*.sswweb
 BD*/
-venv
+
+# Specific folders to ignore
+Fontes/
