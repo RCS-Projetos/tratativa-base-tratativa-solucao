@@ -12,3 +12,16 @@ dist/*
 *.log.*
 *.log
 Fontes/*
+.env
+__pycache__
+*.spec
+.idea
+dist
+build
+logs
+*.spec
+*.parquet
+*.xlsx
+*.csv
+BD*/
+venv

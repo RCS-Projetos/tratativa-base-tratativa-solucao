@@ -10,7 +10,11 @@ LOGGER = logging.getLogger(__name__)
 def preparar_dataframe(arquivo):
     LOGGER.info(f"Lendo arquivo: {arquivo}")
 
-    df = pd.read_csv(arquivo, encoding="latin-1", sep=";", engine="python", dtype={"NOTA_FISCAL": str}, skipfooter=1)
+    try:
+        df = pd.read_csv(arquivo, encoding="latin-1", sep=";", engine="python", dtype={"NOTA_FISCAL": str}, skipfooter=1)
+    except pd.errors.EmptyDataError:
+        LOGGER.warning(f"Arquivo vazio ignorado: {arquivo}")
+        return None
 
     # Colunas CNPJ
     cols_cnpj = ["CNPJ_REMETENTE", "CNPJ_DESTINATARIO", "CNPJ_PAGADOR"]
@@ -20,9 +24,11 @@ def preparar_dataframe(arquivo):
     cols_data = ["EMISSAO", "PREV_ENTREGA", "DATA_OCORRENCIA", "EMISSAO ULT ROMANEIO"]
     transformar_datas(df, cols_data)
 
-    df["COD_OCORRENCIA"] = df["COD_OCORRENCIA"].astype("Int64")
+    if "COD_OCORRENCIA" in df.columns:
+        df["COD_OCORRENCIA"] = df["COD_OCORRENCIA"].astype("Int64")
 
     return df
+
 
 
 def gerar_solucao_aberto(df_ocorrencia, BD_Ocorrencias, OUTPUT, Caminho):
@@ -35,7 +41,17 @@ def gerar_solucao_aberto(df_ocorrencia, BD_Ocorrencias, OUTPUT, Caminho):
 
     for arquivo in listar_arquivos(PASTA):
         df = preparar_dataframe(arquivo)
-        lista_df.append(df)
+        if df is not None:
+            lista_df.append(df)
+
+    if not lista_df:
+        LOGGER.warning(f"Nenhum arquivo válido encontrado na pasta: {PASTA}")
+        return pd.DataFrame(columns=[
+            "Setor Ocorrencia", "CTRC", "EMISSAO", "REMETENTE", "DESTINATARIO", "PAGADOR",
+            "UNID_ENTREGA", "KG_CALCULADO", "NOTA_FISCAL", "FRETE", "PREV_ENTREGA", 
+            "COD_OCORRENCIA", "DESCR_OCORRENCIA", "DATA_OCORRENCIA", "VALOR_MERCADORIA", 
+            "Data_Abertura", "COMPLEMENTO_OCORRENCIA"
+        ])
 
     # Concatenar todos os DataFrames
     df = pd.concat(lista_df, ignore_index=True)
@@ -127,7 +143,17 @@ def gerar_solucao_faltas(df_ocorrencia, BD_Ocorrencias, OUTPUT, Caminho):
 
     for arquivo in listar_arquivos(PASTA):
         df = preparar_dataframe(arquivo)
-        lista_df.append(df)
+        if df is not None:
+            lista_df.append(df)
+
+    if not lista_df:
+        LOGGER.warning(f"Nenhum arquivo válido encontrado na pasta: {PASTA}")
+        return pd.DataFrame(columns=[
+            "Setor Ocorrencia", "CTRC", "EMISSAO", "REMETENTE", "DESTINATARIO", "PAGADOR",
+            "UNID_ENTREGA", "KG_CALCULADO", "NOTA_FISCAL", "FRETE", "PREV_ENTREGA", 
+            "COD_OCORRENCIA", "DESCR_OCORRENCIA", "DATA_OCORRENCIA", "VALOR_MERCADORIA", 
+            "Data_Abertura", "COMPLEMENTO_OCORRENCIA"
+        ])
 
     # Concatenar todos os DataFrames
     df = pd.concat(lista_df, ignore_index=True)
@@ -219,7 +245,18 @@ def gerar_solucao_prev(df_ocorrencia, df_455, OUTPUT, Caminho):
 
     for arquivo in listar_arquivos(PASTA):
         df = preparar_dataframe(arquivo)
-        lista_df.append(df)
+        if df is not None:
+            lista_df.append(df)
+
+    if not lista_df:
+        LOGGER.warning(f"Nenhum arquivo válido encontrado na pasta: {PASTA}")
+        return pd.DataFrame(columns=[
+            "Setor Ocorrencia", "CTRC", "EMISSAO", "REMETENTE", "DESTINATARIO", "PAGADOR",
+            "UNID_ENTREGA", "KG_CALCULADO", "NOTA_FISCAL", "FRETE", "PREV_ENTREGA", 
+            "COD_OCORRENCIA", "DATA_OCORRENCIA", "VALOR_MERCADORIA", "Código", "Descrição", 
+            "Tipo", "Responsabilidade", "Retorno", "Tratativa de Solução", "Tempo Tratativa (horas)", 
+            "Responsabilidade2", "Ação", "Coluna1"
+        ])
 
     # Concatenar todos os DataFrames
     df = pd.concat(lista_df, ignore_index=True)
